@@ -1,0 +1,32 @@
+language: android
+cache: false
+sudo: false
+env:
+  global:
+    - GRADLE_OPTS="-Xmx512m -XX:MaxPermSize=512m"
+    - ANDROID_TARGET=android-23
+
+before_install:
+  # Making sure gradlew has executable permissions
+  - chmod +x gradlew
+  - chmod +x scripts/test_results.sh
+  - chmod +x scripts/build_app.sh
+
+jdk:
+  - oraclejdk7
+
+android:
+  components:
+     - tools
+     - platform-tools
+     - android-23
+     - build-tools-23.0.1
+     - extra
+
+  licenses:
+     - 'android-sdk-license-.+'
+
+script:
+  - scripts/build_app.sh
+after_script:
+  - scripts/test_results.sh

@@ -1,26 +1,126 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.facebook.testing.screenshot'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion androidSdkTarget
+    buildToolsVersion androidBuildTools
+
+    dexOptions {
+        javaMaxHeapSize dexJavaMaxHeapSize
+        preDexLibraries dexPreDexLibraries
+        incremental dexIncremental
+    }
 
     defaultConfig {
         applicationId "io.kaeawc.tapit"
-        minSdkVersion 15
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion androidSdkMinimum
+        targetSdkVersion androidSdkTarget
+        versionCode appVersionCode
+        versionName appVersionName
+
+        testInstrumentationRunner "io.kaeawc.tapit.ScreenshotJUnit4"
     }
+
+    productFlavors {
+        store {
+            // No ability to choose mock core modules
+        }
+        mock {
+            // Ability to toggle mock core modules
+            applicationId "io.kaeawc.tapit.mock"
+        }
+        fast {
+            // Allows for faster builds
+            applicationId "io.kaeawc.tapit.fast"
+            minSdkVersion androidSdkMinimumFast
+        }
+    }
+
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude "META-INF/LICENSE"
+        exclude "META-INF/NOTICE"
+        exclude "META-INF/license"
+        exclude "META-INF/notice"
+        exclude "META-INF/LICENSE.txt"
+        exclude "META-INF/license.txt"
+        exclude "META-INF/NOTICE.txt"
+        exclude "META-INF/notice.txt"
+        exclude 'LICENSE.txt'
+    }
+
+    lintOptions {
+        abortOnError lintAbortOnError
+        checkReleaseBuilds lintCheckReleaseBuilds
+        absolutePaths lintAbsolutePaths
+        checkAllWarnings lintCheckAllWarnings
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = unitTestsReturnDefaultValues
+    }
+}
+
+configurations {
+    storeDebugCompile
+    mockDebugCompile
+    fastDebugCompile
+    storeReleaseCompile
+    mockReleaseCompile
+    fastReleaseCompile
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.0'
+
+    // Google Support Library
+    compile "com.android.support:appcompat-v7:${androidSupportLibraryVersion}"
+
+    compile 'org.apache.commons:commons-lang3:3.4'
+
+    // EventBus
+    compile 'de.greenrobot:eventbus:2.4.0'
+
+    // JSON parsing
+    compile "com.google.code.gson:gson:2.4"
+
+    // Logging
+    compile "com.jakewharton.timber:timber:4.1.0"
+
+    // Unit Testing
+    testCompile "junit:junit:${junitVersion}"
+    testCompile "org.robolectric:robolectric:3.0"
+    testCompile 'org.robolectric:shadows-support-v4:3.0'
+    testCompile 'org.assertj:assertj-core:1.7.1'
+    testCompile 'com.squareup.assertj:assertj-android:1.1.1'
+
+    androidTestCompile 'com.android.support.test:runner:0.4'
+    androidTestCompile 'com.android.support.test:rules:0.4'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-web:2.2.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-intents:2.2.1'
+    androidTestCompile ('com.android.support.test.espresso:espresso-contrib:2.2.1') {
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude module: 'recyclerview-v7'
+    }
+}
+
+configurations.all {
+    // TODO: Comment out when espresso stops depending on support-annotations:22.2.0
+    resolutionStrategy.force 'com.android.support:support-annotations:23.1.0'
 }

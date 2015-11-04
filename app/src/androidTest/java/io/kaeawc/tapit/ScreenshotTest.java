@@ -1,48 +1,63 @@
 package io.kaeawc.tapit;
 
-
-import android.content.res.Resources;
-import android.support.test.InstrumentationRegistry;
+import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.view.LayoutInflater;
 import android.view.View;
 
 import com.facebook.testing.screenshot.Screenshot;
 import com.facebook.testing.screenshot.ViewHelpers;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import io.kaeawc.tapit.views.MainActivity;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 @LargeTest
 public class ScreenshotTest {
 
-    protected MainActivity activity;
+    private static final String INTENT_ACTION_MAIN = "android.intent.action.MAIN";
+    private static final String INTENT_CATEGORY_LAUNCH = "android.intent.category.LAUNCHER";
 
     @Rule
-    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(
             MainActivity.class);
 
+    MainActivity mActivity;
+
+    @Before
+    public void setup() {
+        mActivity = mActivityRule.launchActivity(withLaunchIntent());
+    }
+
     @Test
-    public void addition_isCorrect() throws Exception {
+    public void inflateCreatesTheExpectedScreen() throws Exception {
 
         /**
          * Create and set up your view some how. This might be inflating,
          * or creating from a view class. You might want to set properties
          * on the view.
          */
-        View view = activity.getLayoutInflater().inflate(R.layout.activity_main, null, false);
+
+        Thread.sleep(3000L);
+
+        onView(withId(R.id.photo_list))
+                .check(matches(isDisplayed()));
+
+        View activityLayout = mActivity.getLayoutInflater().inflate(R.layout.activity_main, null, false);
+        View photoList = activityLayout.findViewById(R.id.photo_list);
 
         /**
          * Measure and layout the view. In this example we give an exact
          * width but all the height to be WRAP_CONTENT.
          */
-        ViewHelpers.setupView(view)
+        ViewHelpers.setupView(photoList)
                 .setExactWidthDp(300)
                 .layout();
 
@@ -51,7 +66,14 @@ public class ScreenshotTest {
          * is stored on the device, and the gradle plugin takes care of
          * pulling it and displaying it to you in nice ways.
          */
-        Screenshot.snap(view)
+        Screenshot.snap(photoList)
                 .record();
+    }
+
+    public Intent withLaunchIntent() {
+        Intent intent = new Intent();
+        intent.setAction(INTENT_ACTION_MAIN);
+        intent.addCategory(INTENT_CATEGORY_LAUNCH);
+        return intent;
     }
 }

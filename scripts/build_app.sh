@@ -13,5 +13,6 @@ catch_error () {
 }
 trap catch_error ERR
 echo "Building debug APK to run tests on..."
-./gradlew testMockDebug --quiet
+./gradlew testDebug
+./gradlew verifyMode screenshotTests
 echo "Done running tests"

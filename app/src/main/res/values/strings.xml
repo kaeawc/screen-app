@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tap It</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="photo_missing_description">Photo without description</string>
 </resources>
